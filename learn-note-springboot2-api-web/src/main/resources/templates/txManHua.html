@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>我的推广</title>
+    <link rel="icon" href="/admin_res/favicon.ico">
+</head>
+<body>
+	<div id="data">123</div>
+	<script src="/admin_res/layui-admin/frame/static/js/jquery.min.js"></script>
+	<script th:inline="javascript">
+		var W = {}
+		W['DATA'] = [[${data}]];
+		W['nonce'] = eval([[${nonce}]])
+		$("#data").text(W['nonce']);
+// 		var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+// 		var decode = function (c) {
+// 		    var a = "", b, d, h, f, g, e = 0;
+// 		    for (c = c.replace(/[^A-Za-z0-9\+\/\=]/g, ""); e < c.length;)b = _keyStr.indexOf(c.charAt(e++)), d = _keyStr.indexOf(c.charAt(e++)), f = _keyStr.indexOf(c.charAt(e++)), g = _keyStr.indexOf(c.charAt(e++)), b = b << 2 | d >> 4, d = (d & 15) << 4 | f >> 2, h = (f & 3) << 6 | g, a += String.fromCharCode(b), 64 != f && (a += String.fromCharCode(d)), 64 != g && (a += String.fromCharCode(h));
+// 		    return a = _utf8_decode(a)
+// 		};
+// 		var _utf8_decode = function (c) {
+// 		    for (var a = "", b = 0, d = c1 = c2 = 0; b < c.length;)d = c.charCodeAt(b), 128 > d ? (a += String.fromCharCode(d), b++) : 191 < d && 224 > d ? (c2 = c.charCodeAt(b + 1), a += String.fromCharCode((d & 31) << 6 | c2 & 63), b += 2) : (c2 = c.charCodeAt(b + 1), c3 = c.charCodeAt(b + 2), a += String.fromCharCode((d & 15) << 12 | (c2 & 63) << 6 | c3 & 63), b += 3);
+// 		    return a
+// 		}
+// 		var T = W['DA' + 'TA'].split(''), N = W['n' + 'onc' + 'e'], len, locate, str;
+// 		N = N.match(/\d+[a-zA-Z]+/g);
+// 		len = N.length;
+// 		while (len--) {
+// 		    locate = parseInt(N[len]) & 255;
+// 		    str = N[len].replace(/\d+/g, '');
+// 		    T.splice(locate, str.length)
+// 		}
+// 		T = T.join('');
+// 		_v = JSON.parse(decode(T));
+// 		console.log(_v)
+// 		$("#data").text(_v);
+	</script>
+</body>
+</html>

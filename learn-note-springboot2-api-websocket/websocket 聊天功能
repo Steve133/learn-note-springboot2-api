@@ -1,0 +1,30 @@
+
+
+
+服务端http://localhost:8080/admin
+
+	->admin.html
+		->ws = new WebSocket("ws://127.0.0.1:8080/socketServer/niezhiliang9595");//niezhiliang9595这是服务端标示
+			->@ServerEndpoint(value = "/socketServer/{userName}")
+				->open()方法，增加到session连接
+			->监听服务端消息ws.onmessage
+			->异常关闭ws.onclose
+			->客户端连接ws.onopen
+		->私发sendMsg()
+			->ajax	/sendmsg
+		->群发sendAll()
+			->ajax	/sendAll
+		
+
+客户端http://localhost:8080/index
+
+	->index.html
+		->连接connect()
+			->ws = new WebSocket("ws://127.0.0.1:8080/socketServer/"+$("#username").val());
+				->@ServerEndpoint(value = "/socketServer/{userName}")
+					->open()方法，增加到session连接
+				->监听服务端消息ws.onmessage
+				->异常关闭ws.onclose
+				->客户端连接ws.onopen
+		->发送sendMsg()
+			->发送信息ws.send($("#writeMsg").val());

@@ -1,0 +1,62 @@
+
+
+<a href="/download">下载<a>
+
+
+读取classpath下文件
+	// 方法1：获取文件或流
+	this.getClass().getResource("/")+fileName;
+	this.getClass().getResourceAsStream(failName);
+	// 方法2：获取文件
+	File file = org.springframework.util.ResourceUtils.getFile("classpath:test.txt");
+	// 方法3：获取文件或流
+	ClassPathResource classPathResource = new ClassPathResource("test.txt");
+	classPathResource .getFile();
+	classPathResource .getInputStream();
+	
+	// >>>>>>>>>>>>>>>> 下面方法可以读取jar包下文件
+	假设resources目录下有一个test.txt文件，首先获得当前的类加载器，通过类加载器读取文件。
+	// 方法1
+	InputStream io = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.txt");
+	// 方法2
+	InputStream io = getClass().getClassLoader().getResourceAsStream("test.txt");
+
+jar
+	//获取容器资源解析器
+    ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+	// 获取远程服务器IP和端口
+	try {
+		//获取所有匹配的文件
+        Resource[] resources = resolver.getResources("static/images/faceSearch/*.*");
+        for(Resource resource : resources) {
+            //获得文件流，因为在jar文件中，不能直接通过文件资源路径拿到文件，但是可以在jar包中拿到文件流
+            InputStream stream = resource.getInputStream();
+            if (log.isInfoEnabled()) {
+            	log.info("读取的文件流  [" + stream + "]");
+            }
+            String targetFilePath =env.getProperty("faceSearchDemo.faceSerachPics")+resource.getFilename();
+            if (log.isInfoEnabled()) {
+            	log.info("放置位置  [" + targetFilePath + "]");
+            }
+            File ttfFile = new File(targetFilePath);
+            if(!ttfFile.getParentFile().exists()) {
+            	ttfFile.getParentFile().mkdir();
+            }
+            FileUtils.copyInputStreamToFile(stream, ttfFile);
+        }
+	}catch (Exception e) {
+		log.error(e.getMessage());
+		e.printStackTrace();
+	}
+war
+	File file = ResourceUtils.getFile("classpath:static/images/faceSearch");
+	if (file.exists()) {
+		File[] files = file.listFiles();
+		List<String> imageList = new ArrayList<>();
+		if (files != null) {
+			for(File fileC :files) {
+				imageList.add(fileC.getName());
+			}
+		}
+		model.addAttribute("faceSerachImgList", imageList);
+	}

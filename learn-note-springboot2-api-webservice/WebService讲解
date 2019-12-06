@@ -1,0 +1,18 @@
+WebService是一种跨编程语言和跨操作系统平台的远程调用技术。
+
+XML+XSD,SOAP和WSDL就是构成WebService平台的三大技术
+
+WebService通过HTTP协议发送请求和接收结果时，发送的请求内容和结果内容都采用XML格式封装，并增加了一些特定的HTTP消息头，以说明 HTTP消息的内容格式，这些特定的HTTP消息头和XML内容格式就是SOAP协议。SOAP提供了标准的RPC方法来调用Web Service
+
+	SOAP协议 = HTTP协议 + XML数据格式
+
+
+调用方式 
+	1、cmd 新建一个目录，进入该目录  使用命令
+		wsimport -s .  http://ws.webxml.com.cn/WebServices/MobileCodeWS.asmx?wsdl
+	
+		MobileCodeWS ms = new MobileCodeWS();
+	    MobileCodeWSSoap mobileCodeWSSoap = ms.getMobileCodeWSSoap();
+	    //此处填写手机号
+	    String mobileCodeInfo = mobileCodeWSSoap.getMobileCodeInfo("137854309", null);
+	    System.out.println(mobileCodeInfo);

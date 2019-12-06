@@ -1,0 +1,174 @@
+申请SSL证书
+	打开阿里云证书，可以申请免费一年。一年后继续免费申请一年即可。
+证书文件介绍
+	在证书控制台下载Tomcat版本证书，下载到本地的是一个压缩文件，解压后里面包含.pfx文件是证书文件，pfx_password.txt是证书文件的密码。
+将 .pfx 文件复制到 resources 根目录，然后配置 application-prod.properties （生产配置文件）：
+
+## HTTPS
+server.ssl.key-store=classpath:xx.com.pfx
+server.ssl.key-store-password=123456
+server.ssl.key-store-type=PKCS12
+server.port=443
+
+配置项如下：
+server.port HTTPS 加密端口
+server.ssl.key-store SSL证书路径
+server.ssl.key-store-password SSL证书密码
+server.ssl.key-store-type 证书类型
+
+然后新增 HttpsConfig 类，自己查看代码HttpsConfig
+
+
+
+-------------------------------------------------------------------------
+注意点：
+– 这是 1.x 的配置，2.x 版本有所不同
+
+1.5配置
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+
+@Configuration
+public class HttpsConfig {
+
+	@Value("${http.port}")
+	private int http_port;
+	@Value("${server.port}")
+	private int port;
+	/**
+	 * 让我们的应用支持HTTP是个好想法，但是需要重定向到HTTPS，
+	 * 但是不能同时在application.properties中同时配置两个connector， 所以要以编程的方式配置HTTP
+	 * connector，然后重定向到HTTPS connector
+	 * @return
+	 */
+	@Bean
+	public Connector initiateHttpConnector() {
+		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+		connector.setScheme("http");
+		connector.setPort(http_port);
+		connector.setSecure(false);
+		connector.setRedirectPort(port);
+		return connector;
+	}
+
+	/**
+	 * 配置一个TomcatEmbeddedServletContainerFactory bean
+	 * @param connector
+	 * @return
+	 */
+	@Bean
+	public EmbeddedServletContainerFactory servletContainer(Connector connector) {
+ 
+		TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory() {
+			
+			@Override
+			protected void postProcessContext(Context context) {
+ 
+				SecurityConstraint securityConstraint = new SecurityConstraint();
+				securityConstraint.setUserConstraint("CONFIDENTIAL");
+				SecurityCollection collection = new SecurityCollection();
+				collection.addPattern("/*");
+				securityConstraint.addCollection(collection);
+				context.addConstraint(securityConstraint);
+			}
+		};
+		tomcat.addAdditionalTomcatConnectors(initiateHttpConnector());
+		return tomcat;
+	}
+}
+
+
+2.0配置
+
+=======================两个端口都可以访问=============================
+import org.apache.catalina.connector.Connector;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+
+@Configuration
+public class HttpsConfig {
+
+	@Value("${http.port}")
+	private int http_port;
+	@Value("${server.port}")
+	private int port;
+	
+	@Bean
+	public ServletWebServerFactory servletContainer() {
+		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
+		tomcat.addAdditionalTomcatConnectors(createSslConnector());
+		return tomcat;
+	}
+
+	private Connector createSslConnector() {
+		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+		try {
+			connector.setScheme("http");
+			connector.setSecure(false);
+			connector.setPort(http_port);
+			connector.setRedirectPort(port);
+			return connector;
+		} catch (Exception ex) {
+			throw new IllegalStateException("cant access keystore: [" + "keystore" + "]  ", ex);
+		}
+	}
+}
+=======================http端口自动跳https=============================
+import org.apache.catalina.Context;
+import org.apache.catalina.connector.Connector;
+import org.apache.tomcat.util.descriptor.web.SecurityCollection;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+
+@Configuration
+public class HttpsConfig {
+
+	@Value("${http.port}")
+	private int http_port;
+	@Value("${server.port}")
+	private int port;
+	
+	@Bean
+	public ServletWebServerFactory servletContainer() {
+		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
+			@Override
+            protected void postProcessContext(Context context) {
+                SecurityConstraint securityConstraint = new SecurityConstraint();
+                securityConstraint.setUserConstraint("CONFIDENTIAL");
+                SecurityCollection collection = new SecurityCollection();
+                collection.addPattern("/*");
+                securityConstraint.addCollection(collection);
+                context.addConstraint(securityConstraint);
+            }
+		};
+		tomcat.addAdditionalTomcatConnectors(createSslConnector());
+		return tomcat;
+	}
+
+	private Connector createSslConnector() {
+		Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
+		try {
+			connector.setScheme("http");
+			connector.setPort(http_port);
+			connector.setSecure(false);
+			connector.setRedirectPort(port);
+			return connector;
+		} catch (Exception ex) {
+			throw new IllegalStateException("cant access keystore: [" + "keystore" + "]  ", ex);
+		}
+	}
+}
