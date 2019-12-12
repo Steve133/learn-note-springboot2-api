@@ -1,4 +1,4 @@
-package my.master;
+package cn.center.controller;
 
 import java.util.*;
 
@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.*;
 
-import my.master.domain.User;
+import cn.center.domain.User;
 
 /**
  *

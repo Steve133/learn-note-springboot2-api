@@ -1,4 +1,4 @@
-package my.master.domain;
+package cn.center.domain;
 
 
 
